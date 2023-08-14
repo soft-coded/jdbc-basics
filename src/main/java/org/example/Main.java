@@ -2,76 +2,74 @@ package org.example;
 
 import com.mongodb.client.*;
 import org.bson.Document;
-import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.List;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
+// import com.mongodb.client.model.Filters;
+// import com.mongodb.client.model.Updates;
 
 public class Main {
+    private static final String DB_URI = "mongodb://localhost";
+    private static final String DB_NAME = "jdbc-test";
+    private static final String COLLECTION_NAME = "people";
+
     public static void main(String[] args) {
 
         // Creating a Mongo client
-        String uri = "mongodb://localhost";
-        MongoClient mongo = MongoClients.create(uri);
+        MongoClient mongo = MongoClients.create(DB_URI);
 
-        MongoDatabase database = mongo.getDatabase("jdbc-test");
-        System.out.println("Created jdbc-test Database");
+        MongoDatabase database = mongo.getDatabase(DB_NAME);
+        System.out.println("Database " + DB_NAME + " database created successfully");
 
         // Get all db's
-        System.out.println("####DB List");
+        System.out.println("\nAll databases:");
         MongoIterable<String> dbList = mongo.listDatabaseNames();
         for (String dbName : dbList) {
             System.out.println(dbName);
         }
 
         // Creating a collection
-        database.createCollection("people");
-        System.out.println("Collection 'people' created successfully");
+        database.createCollection(COLLECTION_NAME);
+        System.out.println("Collection " + COLLECTION_NAME + " created successfully");
 
         // get all collections
-        System.out.println("####Collection List: ");
+        System.out.println("\nAll collections:");
         MongoIterable<String> collections = database.listCollectionNames();
         for (String col : collections) {
             System.out.println(col);
         }
 
-        System.out.println();
         // get a collection
-        MongoCollection<org.bson.Document> collection = database.getCollection("student");
-        System.out.println("Collection selected");
+        MongoCollection<org.bson.Document> collection = database.getCollection(COLLECTION_NAME);
 
         // Insert one document
-        Document document = new Document("rollNo", 200)
-                .append("name", "Sam")
-                .append("age", 12);
+        Document document = new Document("name", "Shrutanten")
+                .append("age", 22)
+                .append("canDrive", true);
+        System.out.println("New document created:\n" + document);
 
         collection.insertOne(document);
         System.out.println("Inserted document successfully!");
 
         // Get all documents
-        System.out.println("####Document List: ");
+        System.out.println("All documents:");
         FindIterable<Document> docs = collection.find();
-        int i = 1;
+
         // Getting the iterator
-        Iterator itr = docs.iterator();
+        MongoCursor<Document> itr = docs.iterator();
         while (itr.hasNext()) {
             System.out.println(itr.next());
-            i++;
         }
 
         // Insert many documents
-        Document doc1 = new Document("rollNo", 201)
-                .append("name", "Ram")
-                .append("age", 12);
-
-        Document doc2 = new Document("rollNo", 202)
-                .append("name", "Ann")
-                .append("age", 12);
-
-        Document doc3 = new Document("rollNo", 203)
-                .append("name", "Sachin")
-                .append("age", 12);
+        Document doc1 = new Document("name", "Ramesh")
+                .append("age", 17)
+                .append("canDrive", false);
+        Document doc2 = new Document("name", "Suresh")
+                .append("age", 25)
+                .append("canDrive", true);
+        Document doc3 = new Document("name", "Rashmi")
+                .append("age", 13)
+                .append("canDrive", false);
 
         List<Document> docList = new ArrayList<>();
         docList.add(doc1);
@@ -82,22 +80,18 @@ public class Main {
         collection.insertMany(docList);
 
         // Get all documents
-        System.out.println();
         FindIterable<Document> docs2 = collection.find();
-        int i2 = 1;
         // Getting the iterator
-        Iterator itr2 = docs2.iterator();
+        MongoCursor<Document> itr2 = docs2.iterator();
         while (itr2.hasNext()) {
             System.out.println(itr2.next());
-            i2++;
         }
-        System.out.println();
 
         // Update
-        collection.updateOne(Filters.eq("name", "Sam"), Updates.set("age", 13));
+        // collection.updateOne(Filters.eq("name", "Sam"), Updates.set("age", 13));
 
         // Delete
-        collection.deleteOne(Filters.eq("name", "Sam"));
+        // collection.deleteOne(Filters.eq("name", "Sam"));
 
     }
 }
